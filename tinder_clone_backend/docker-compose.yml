@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  mysqldb:
+    container_name: mysqldb-container
+    image: mysql/mysql-server:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: tinder@1234
+      MYSQL_DATABASE: tinder
+      MYSQL_USER: tinder_user
+      MYSQL_PASSWORD: tinder@123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - tinder_clone_backend_springboot-mysql-net
+
+  spring-tinder-app:
+    container_name: spring-tinder-app-container
+    build: ./
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/tinder
+      SPRING_DATASOURCE_USERNAME: tinder_user
+      SPRING_DATASOURCE_PASSWORD: tinder@123
+    depends_on:
+      - mysqldb
+    networks:
+      - tinder_clone_backend_springboot-mysql-net
+
+  fontend:
+    container_name: gifted_galois
+    build: ../tinder_clone_frontend/
+    ports:
+      - 80:80
+    networks:
+      - tinder_clone_backend_springboot-mysql-net
+    depends_on:
+      - spring-tinder-app
+networks:
+  tinder_clone_backend_springboot-mysql-net:
+
+volumes:
+  mysql-data:
